@@ -43,7 +43,12 @@ class Caroneiro(object):
                     self.caronas_ida[idx,3] = local
                 else:
                     self.caronas_ida = np.append(self.caronas_ida,[[username, horario, vagas,local]],axis=0)
-            
+                # check if this ride is desired by anyone in the database
+                for idx in np.where(self.horarios[:,1] == horario)[0]:
+                    chat_id = self.horarios[idx,0]
+                    msg = f"Aviso de carona de ida de @{username} às {horario} com {vagas} vagas saindo de {local}"
+                    context.bot.send_message(chat_id, msg)
+
             if args[0] == '/volta':
                 if username in self.caronas_volta[:,0]:
                     idx = np.where(self.caronas_volta[:,0]==username)[0]
@@ -52,6 +57,11 @@ class Caroneiro(object):
                     self.caronas_volta[idx,3] = local
                 else:
                     self.caronas_volta = np.append(self.caronas_volta,[[username, horario, vagas,local]],axis=0)
+                # check if this ride is desired by anyone in the database
+                for idx in np.where(self.horarios[:,2] == horario)[0]:
+                    chat_id = self.horarios[idx,0]
+                    msg = f"Aviso de carona de volta de @{username} às {horario} com {vagas} vagas saindo de {local}"
+                    context.bot.send_message(chat_id, msg)
 
     def get_set_horario(self, update, context):
         channel = update.message.chat.type
@@ -62,21 +72,33 @@ class Caroneiro(object):
                 horario_volta = self.convert_horario(args[1])
                 user = update.message.from_user
                 username = user.username
-                if username in self.horarios[:,0]:
-                    idx = np.where(self.horarios[:,0]==username)[0]
+                chat_id = str(update.message.chat.id)
+                if chat_id in self.horarios[:,0]:
+                    idx = np.where(self.horarios[:,0]==chat_id)[0]
                     self.horarios[idx,1] = horario_ida
                     self.horarios[idx,2] = horario_volta
                 else:
-                    self.horarios = np.append(self.horarios, [[username, horario_ida, horario_volta]],axis=0)
+                    self.horarios = np.append(self.horarios, [[int(chat_id), horario_ida, horario_volta]],axis=0)
                 msg = f"Horários de @{username}:\nIda: {horario_ida}\nVolta: {horario_volta}"
             else:
                 user = update.message.from_user
                 username = user.username
-                idx = np.where(self.horarios[:,0]==username)[0][0]
-                msg = f"Horários de @{username}:\nIda: {self.horarios[idx,1]}\nVolta: {self.horarios[idx,2]}"
+                chat_id = str(update.message.chat.id)
+                try:
+                    idx = np.where(self.horarios[:,0]==chat_id)[0][0]
+                    msg = f"Horários de @{username}:\nIda: {self.horarios[idx,1]}\nVolta: {self.horarios[idx,2]}"
+                except: 
+                    msg = "Nenhum horário cadastrado no momento"
             update.message.reply_text(msg)
         else:
             pass
+
+    def remove_horario(self, update, context):
+        channel = update.message.chat.type
+        if channel == 'private':
+            chat_id = str(update.message.chat.id)
+            idx = np.where(self.horarios[:,0]==chat_id)[0][0]
+            self.horarios = np.delete(self.horarios,idx,0)
 
 def main():
     
@@ -106,6 +128,10 @@ def main():
 
     dispatcher.add_handler(
             CommandHandler('hora', caroneiro.get_set_horario)
+        )
+    
+    dispatcher.add_handler(
+            CommandHandler('remover', caroneiro.remove_horario)
         )
     
 
