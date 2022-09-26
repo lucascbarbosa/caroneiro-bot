@@ -22,8 +22,16 @@ class Caroneiro(object):
         return horario
 
     def ajuda(self, update, context):
-        update.message.reply_text("Your Message")
-    
+        channel = update.message.chat.type
+        if channel == 'private':
+            msg = """O caroneiro te avisa das caronas que te interessam. LEMBRANDO QUE ESTE BOT SÓ FUNCIONA NO PRIVADO. Os comandos são:
+            \t/hora [horario_ida] [horario_volta] -> Para informar ou atualizar os horários de ida e volta. Caso queira somente um dos horários, mantenha o outro como 0.
+            \tEx: /hora 8 15\n
+            \tInforma que os horários de ida e volta desejados são 8:00 e 10:00 respectivamente.\n
+            \t/remover -> remove os horários informados."""
+            
+            update.message.reply_text(msg)
+        
     def add_carona(self, update, context):
         args = update.message.text.split()
         if len(args) > 1:
