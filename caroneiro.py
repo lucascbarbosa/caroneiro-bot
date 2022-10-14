@@ -112,6 +112,13 @@ class Caroneiro(object):
     def avisa(self, update, context):
         channel = update.message.chat.type
         if channel == 'private':
+            self.avisa = True
+    
+    def silencia(self, update, context):
+        channel = update.message.chat.type
+        if channel == 'private':
+            self.avisa = False
+
 def main():
     
     # Create the Updater and pass it your bot's token.
@@ -146,6 +153,10 @@ def main():
             CommandHandler('remover', caroneiro.remove_horario)
         )
     
+    dispatcher.add_handler(
+            CommandHandler('avisa', caroneiro.remove_horario)
+        )
+
     dispatcher.add_handler(
             CommandHandler('avisa', caroneiro.remove_horario)
         )
