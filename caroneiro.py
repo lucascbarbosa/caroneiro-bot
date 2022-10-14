@@ -11,6 +11,7 @@ class Caroneiro(object):
         self.caronas_ida = np.empty((0,4))
         self.caronas_volta = np.empty((0,4))
         self.horarios = np.empty((0,3))
+        self.avisa = True
 
     def convert_horario(self, horario):
         try:
@@ -107,6 +108,16 @@ class Caroneiro(object):
             chat_id = str(update.message.chat.id)
             idx = np.where(self.horarios[:,0]==chat_id)[0][0]
             self.horarios = np.delete(self.horarios,idx,0)
+    
+    def avisa(self, update, context):
+        channel = update.message.chat.type
+        if channel == 'private':
+            self.avisa = True
+    
+    def silencia(self, update, context):
+        channel = update.message.chat.type
+        if channel == 'private':
+            self.avisa = False
 
 def main():
     
@@ -142,6 +153,13 @@ def main():
             CommandHandler('remover', caroneiro.remove_horario)
         )
     
+    dispatcher.add_handler(
+            CommandHandler('avisa', caroneiro.remove_horario)
+        )
+
+    dispatcher.add_handler(
+            CommandHandler('avisa', caroneiro.remove_horario)
+        )
 
     # Start the Bot
     updater.start_polling()
