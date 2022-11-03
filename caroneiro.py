@@ -55,9 +55,9 @@ class Caroneiro(object):
                 else:
                     self.caronas_ida = np.append(self.caronas_ida,[[username, horario, vagas,local]],axis=0)
                 # check if this ride is desired by anyone in the database
-                for idx in np.where(self.horarios[:,1] == horario)[0]:
+                for idx in np.where((self.horarios[:,1]<=horario)&(self.horarios[:,2]>=horario))[0]:
                     chat_id = self.horarios[idx,0]
-                    msg = f"Aviso de carona de ida de @{username} às {horario} com {vagas} vagas saindo de {local}"
+                    msg = f"IDA: Carona de @{username} às {horario} com {vagas} vagas saindo de {local}"
                     context.bot.send_message(chat_id, msg)
 
             if args[0] == '/volta':
@@ -69,9 +69,9 @@ class Caroneiro(object):
                 else:
                     self.caronas_volta = np.append(self.caronas_volta,[[username, horario, vagas,local]],axis=0)
                 # check if this ride is desired by anyone in the database
-                for idx in np.where(self.horarios[:,2] == horario)[0]:
+                for idx in np.where((self.horarios[:,3]<=horario)&(self.horarios[:,4]>=horario))[0]:
                     chat_id = self.horarios[idx,0]
-                    msg = f"Aviso de carona de volta de @{username} às {horario} com {vagas} vagas saindo de {local}"
+                    msg = f"VOLTA: Carona de @{username} às {horario} com {vagas} vagas saindo de {local}"
                     context.bot.send_message(chat_id, msg)
 
     def get_set_horario(self, update, context):
