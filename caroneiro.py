@@ -10,8 +10,8 @@ class Caroneiro(object):
     def __init__(self):
         self.caronas_ida = np.empty((0,4))
         self.caronas_volta = np.empty((0,4))
-        self.horarios = np.empty((0,3))
-        self.avisa = True
+        self.horarios = np.empty((0,5))
+        self.ouvir = True
 
     def convert_horario(self, horario):
         try:
@@ -34,6 +34,7 @@ class Caroneiro(object):
             update.message.reply_text(msg)
         
     def add_carona(self, update, context):
+        print('foo')
         args = update.message.text.split()
         if len(args) > 1:
             horario = self.convert_horario(args[1])
@@ -77,18 +78,36 @@ class Caroneiro(object):
         if channel == 'private':
             args = context.args
             if len(args) > 0:
-                horario_ida = self.convert_horario(args[0])
-                horario_volta = self.convert_horario(args[1])
+                horario_ida_inicio = self.convert_horario(args[0])
+                horario_ida_fim = self.convert_horario(args[1])
+                horario_volta_inicio = self.convert_horario(args[2])
+                horario_volta_fim = self.convert_horario(args[3])
+
                 user = update.message.from_user
                 username = user.username
                 chat_id = str(update.message.chat.id)
                 if chat_id in self.horarios[:,0]:
                     idx = np.where(self.horarios[:,0]==chat_id)[0]
-                    self.horarios[idx,1] = horario_ida
-                    self.horarios[idx,2] = horario_volta
+                    self.horarios[idx,1] = horario_ida_inicio
+                    self.horarios[idx,2] = horario_ida_fim
+                    self.horarios[idx,3] = horario_volta_inicio
+                    self.horarios[idx,4] = horario_volta_fim
                 else:
-                    self.horarios = np.append(self.horarios, [[int(chat_id), horario_ida, horario_volta]],axis=0)
-                msg = f"Horários de @{username}:\nIda: {horario_ida}\nVolta: {horario_volta}"
+                    self.horarios = np.append(self.horarios, [[int(chat_id), horario_ida_inicio,horario_ida_fim, horario_volta_inicio, horario_volta_fim]],axis=0)
+                
+                msg = f"Horários de @{username}:\n"
+
+                if horario_ida_inicio != "0:00" and horario_ida_fim != "0:00":
+                    if horario_ida_inicio == horario_ida_fim:
+                        msg += f"Ida: {horario_ida_inicio}\n"
+                    else:
+                        msg += f"Ida: {horario_ida_inicio}-{horario_ida_fim}\n"
+                if horario_volta_inicio != "0:00" and horario_volta_fim != "0:00":
+                    if horario_volta_inicio == horario_volta_fim:
+                        msg += f"Volta: {horario_volta_inicio}\n"
+                    else:
+                        msg += f"Volta: {horario_volta_inicio}-{horario_volta_fim}\n"
+                
             else:
                 user = update.message.from_user
                 username = user.username
@@ -101,7 +120,7 @@ class Caroneiro(object):
             update.message.reply_text(msg)
         else:
             pass
-
+    
     def remove_horario(self, update, context):
         channel = update.message.chat.type
         if channel == 'private':
@@ -111,13 +130,17 @@ class Caroneiro(object):
     
     def avisa(self, update, context):
         channel = update.message.chat.type
+        print('foo1')
         if channel == 'private':
-            self.avisa = True
-    
+            self.ouvir = True
+            update.message.reply_text("Aviso LIGADO")
+
     def silencia(self, update, context):
         channel = update.message.chat.type
+        print('foo2')
         if channel == 'private':
-            self.avisa = False
+            self.ouvir = False
+            update.message.reply_text("Aviso DESLIGADO.")
 
 def main():
     
@@ -144,21 +167,21 @@ def main():
     dispatcher.add_handler(
             MessageHandler(Filters.regex(r'/volta'), caroneiro.add_carona)
         )
-
+    
     dispatcher.add_handler(
             CommandHandler('hora', caroneiro.get_set_horario)
         )
-    
+
     dispatcher.add_handler(
             CommandHandler('remover', caroneiro.remove_horario)
         )
     
     dispatcher.add_handler(
-            CommandHandler('avisa', caroneiro.remove_horario)
+            CommandHandler('avisa', caroneiro.avisa)
         )
 
     dispatcher.add_handler(
-            CommandHandler('avisa', caroneiro.remove_horario)
+            CommandHandler('silencia', caroneiro.silencia)
         )
 
     # Start the Bot
