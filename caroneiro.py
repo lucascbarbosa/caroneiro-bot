@@ -134,7 +134,7 @@ class Caroneiro(object):
                     horario_ida_fim = self.horarios[idx,2]
                     horario_volta_inicio = self.horarios[idx,3]
                     horario_volta_fim = self.horarios[idx,4]
-                    if horario_ida_inicio != "0:00" and horario_ida_fim != "0:00" and horario_volta_inicio != "0:00" and horario_volta_fim != "0:00":  
+                    if (horario_ida_inicio != "0:00" and horario_ida_fim != "0:00") or (horario_volta_inicio != "0:00" and horario_volta_fim != "0:00"):  
                         msg = f"Horários de @{username}:\n"
                         if horario_ida_inicio != "0:00" and horario_ida_fim != "0:00":
                             if horario_ida_inicio == horario_ida_fim:
