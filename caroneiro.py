@@ -171,12 +171,12 @@ class Caroneiro(object):
                     self.horarios[idx,3] = "0:00"
                     self.horarios[idx,4] = "0:00"        
                     msg = "Horário de VOLTA removido."
-                else:
-                    self.horarios[idx,1] = "0:00"
-                    self.horarios[idx,2] = "0:00"
-                    self.horarios[idx,3] = "0:00"
-                    self.horarios[idx,4] = "0:00"        
-                    msg = "Horários de IDA e VOLTA removidos."
+            else:
+                self.horarios[idx,1] = "0:00"
+                self.horarios[idx,2] = "0:00"
+                self.horarios[idx,3] = "0:00"
+                self.horarios[idx,4] = "0:00"        
+                msg = "Horários de IDA e VOLTA removidos."
 
             update.message.reply_text(msg)
 
