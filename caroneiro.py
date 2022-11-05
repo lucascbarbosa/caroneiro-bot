@@ -29,7 +29,7 @@ class Caroneiro(object):
             \t/hora [ida/volta] [horario de ida/volta inicial] [horario de ida/volta final] -> Informa ou atualiza a janela de horários de ida ou volta. Caso queira somente um horário, digite o mesmo horário duas vezes. Para visualizar os horários, digite somente /hora.
             \tEx: /hora ida 8 8 para IDA às 8:00
             \tEx: /hora volta 15 16 para VOLTA entre 15:00 e 16:00
-            \t/remover [ida/volta]-> remove os horários de ida ou volta informados.
+            \t/remover [ida/volta]-> remove os horários de ida ou volta informados. Caso não seja informado o trajeto, ambos os horários serão removidos.
             \tEx: /remover ida para remover horários de IDA.
             \t/avisa -> HABILITA o bot para avisar de caronas.
             \t/silencia -> SILENCIA o bot."""
