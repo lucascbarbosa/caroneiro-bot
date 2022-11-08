@@ -87,24 +87,36 @@ class Caroneiro(object):
                     idx = np.where(self.horarios[:,0]==chat_id)[0]
                     if trajeto == "ida":
                         horario_ida_inicio = self.convert_horario(args[1])
-                        horario_ida_fim = self.convert_horario(args[2])
+                        try:
+                            horario_ida_fim = self.convert_horario(args[2])
+                        except:
+                            horario_ida_fim  = horario_ida_inicio
                         self.horarios[idx,1] = horario_ida_inicio
                         self.horarios[idx,2] = horario_ida_fim
                 
                     elif trajeto == "volta":
                         horario_volta_inicio = self.convert_horario(args[1])
-                        horario_volta_fim = self.convert_horario(args[2])
+                        try:
+                            horario_volta_fim = self.convert_horario(args[2])
+                        except:
+                            horario_volta_fim  = horario_volta_inicio
                         self.horarios[idx,3] = horario_volta_inicio
                         self.horarios[idx,4] = horario_volta_fim
 
                 else:
                     if trajeto == "ida":
                         horario_ida_inicio = self.convert_horario(args[1])
-                        horario_ida_fim = self.convert_horario(args[2])
+                        try:
+                            horario_ida_fim = self.convert_horario(args[2])
+                        except:
+                            horario_ida_fim  = horario_ida_inicio
                         self.horarios = np.append(self.horarios, [[int(chat_id), horario_ida_inicio,horario_ida_fim, "0:00", "0:00"]],axis=0)
                     if trajeto == "volta":
                         horario_volta_inicio = self.convert_horario(args[1])
-                        horario_volta_fim = self.convert_horario(args[2])
+                        try:
+                            horario_volta_fim = self.convert_horario(args[2])
+                        except:
+                            horario_volta_fim  = horario_volta_inicio
                         self.horarios = np.append(self.horarios, [[int(chat_id), "0:00", "0:00", horario_volta_inicio, horario_volta_fim]],axis=0)
 
                 if trajeto == "ida":
