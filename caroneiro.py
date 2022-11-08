@@ -71,7 +71,7 @@ class Caroneiro(object):
                 # check if this ride is desired by anyone in the database
                 for idx in np.where((self.horarios[:,3]<=horario)&(self.horarios[:,4]>=horario))[0]:
                     chat_id = self.horarios[idx,0]
-                    msg = f"VOLTA: Carona de @{username} às {horario} com {vagas} vagas saindo de {local}"
+                    msg = f"VOLTA: Carona de @{username} às {horario} com {vagas} vagas voltando para {local}"
                     context.bot.send_message(chat_id, msg)
 
     def get_set_horario(self, update, context):
