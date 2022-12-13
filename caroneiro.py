@@ -13,15 +13,14 @@ class Caroneiro(object):
         self.horarios = np.empty((0,5))
         self.ouvir = True
 
-    def convert_horario(self, horario):
+    def convert_horario_string(self, horario):
         try:
             horario = int(horario)
-            horario = '%d:00'%horario
+            horario_string = '%02d:00'%horario
+            return horario_string
         except:
-            pass
-
-        return horario
-
+            return horario
+    
     def ajuda(self, update, context):
         channel = update.message.chat.type
         if channel == 'private':
@@ -38,14 +37,13 @@ class Caroneiro(object):
     def add_carona(self, update, context):
         args = update.message.text.split()
         if len(args) > 1:
-            horario = self.convert_horario(args[1])
+            horario = self.convert_horario_string(args[1])
             vagas = args[2]
             local = args[3]
             user = update.message.from_user
             username = user.username
             # msg_carona = f'@{username} - {horario} de {local} ({vagas} vagas)'
             # update.message.reply_text(msg_carona)
-        
             if args[0] == '/ida':
                 if username in self.caronas_ida[:,0]:
                     idx = np.where(self.caronas_ida[:,0]==username)[0]
@@ -86,18 +84,18 @@ class Caroneiro(object):
                 if chat_id in self.horarios[:,0]:
                     idx = np.where(self.horarios[:,0]==chat_id)[0]
                     if trajeto == "ida":
-                        horario_ida_inicio = self.convert_horario(args[1])
+                        horario_ida_inicio = self.convert_horario_string(args[1])
                         try:
-                            horario_ida_fim = self.convert_horario(args[2])
+                            horario_ida_fim = self.convert_horario_string(args[2])
                         except:
                             horario_ida_fim  = horario_ida_inicio
                         self.horarios[idx,1] = horario_ida_inicio
                         self.horarios[idx,2] = horario_ida_fim
                 
                     elif trajeto == "volta":
-                        horario_volta_inicio = self.convert_horario(args[1])
+                        horario_volta_inicio = self.convert_horario_string(args[1])
                         try:
-                            horario_volta_fim = self.convert_horario(args[2])
+                            horario_volta_fim = self.convert_horario_string(args[2])
                         except:
                             horario_volta_fim  = horario_volta_inicio
                         self.horarios[idx,3] = horario_volta_inicio
@@ -105,16 +103,16 @@ class Caroneiro(object):
 
                 else:
                     if trajeto == "ida":
-                        horario_ida_inicio = self.convert_horario(args[1])
+                        horario_ida_inicio = self.convert_horario_string(args[1])
                         try:
-                            horario_ida_fim = self.convert_horario(args[2])
+                            horario_ida_fim = self.convert_horario_string(args[2])
                         except:
                             horario_ida_fim  = horario_ida_inicio
                         self.horarios = np.append(self.horarios, [[int(chat_id), horario_ida_inicio,horario_ida_fim, "0:00", "0:00"]],axis=0)
                     if trajeto == "volta":
-                        horario_volta_inicio = self.convert_horario(args[1])
+                        horario_volta_inicio = self.convert_horario_string(args[1])
                         try:
-                            horario_volta_fim = self.convert_horario(args[2])
+                            horario_volta_fim = self.convert_horario_string(args[2])
                         except:
                             horario_volta_fim  = horario_volta_inicio
                         self.horarios = np.append(self.horarios, [[int(chat_id), "0:00", "0:00", horario_volta_inicio, horario_volta_fim]],axis=0)
@@ -166,7 +164,7 @@ class Caroneiro(object):
             update.message.reply_text(msg)
         else:
             pass
-    
+
     def remove_horario(self, update, context):
         channel = update.message.chat.type
         if channel == 'private':
@@ -206,8 +204,10 @@ class Caroneiro(object):
             self.ouvir = False
             update.message.reply_text("Aviso DESLIGADO.")
 
-def main():
+
     
+if __name__ == '__main__':
+    print("press CTRL + C to cancel.")
     # Create the Updater and pass it your bot's token.
     token = '5725480727:AAEi6lXGnvJzQMPm0R76Uss8HWtdhnmWdFY'
     
@@ -257,7 +257,4 @@ def main():
     updater.idle()
 
 
-if __name__ == '__main__':
-    print("press CTRL + C to cancel.")
-    main()
 
