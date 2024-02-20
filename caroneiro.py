@@ -1,10 +1,7 @@
-from telegram.ext.updater import Updater
-from telegram.update import Update
-from telegram.ext.callbackcontext import CallbackContext
-from telegram.ext.commandhandler import CommandHandler
-from telegram.ext.messagehandler import MessageHandler
-from telegram.ext.filters import Filters
+from telegram import Update
+from telegram.ext import Application, CommandHandler, MessageHandler, filters
 import numpy as np
+import asyncio
 
 class Caroneiro(object):
     def __init__(self):
@@ -21,7 +18,7 @@ class Caroneiro(object):
         except:
             return horario
     
-    def ajuda(self, update, context):
+    async def ajuda(self, update, context):
         channel = update.message.chat.type
         if channel == 'private':
             msg = """O caroneiro te avisa das caronas que te interessam. LEMBRANDO QUE ESTE BOT SÓ FUNCIONA NO PRIVADO. Os comandos são:
@@ -32,9 +29,9 @@ class Caroneiro(object):
             \tEx: /remover ida para remover horários de IDA.
             \t/avisa -> HABILITA o bot para avisar de caronas.
             \t/silencia -> SILENCIA o bot."""
-            update.message.reply_text(msg)
+            await update.message.reply_text(msg)
         
-    def add_carona(self, update, context):
+    async def add_carona(self, update, context):
         args = update.message.text.split()
         if len(args) > 1:
             horario = self.convert_horario_string(args[1])
@@ -43,7 +40,7 @@ class Caroneiro(object):
             user = update.message.from_user
             username = user.username
             # msg_carona = f'@{username} - {horario} de {local} ({vagas} vagas)'
-            # update.message.reply_text(msg_carona)
+            # await update.message.reply_text(msg_carona)
             if args[0] == '/ida':
                 if username in self.caronas_ida[:,0]:
                     idx = np.where(self.caronas_ida[:,0]==username)[0]
@@ -72,7 +69,7 @@ class Caroneiro(object):
                     msg = f"VOLTA: Carona de @{username} às {horario} com {vagas} vagas voltando para {local}"
                     context.bot.send_message(chat_id, msg)
 
-    def get_set_horario(self, update, context):
+    async def get_set_horario(self, update, context):
         channel = update.message.chat.type
         if channel == 'private':
             args = context.args
@@ -161,11 +158,11 @@ class Caroneiro(object):
                         msg = "Nenhum horário cadastrado no momento"
                 except: 
                     msg = "Nenhum horário cadastrado no momento"
-            update.message.reply_text(msg)
+            await update.message.reply_text(msg)
         else:
             pass
 
-    def remove_horario(self, update, context):
+    async def remove_horario(self, update, context):
         channel = update.message.chat.type
         if channel == 'private':
             args = context.args
@@ -190,22 +187,21 @@ class Caroneiro(object):
                 self.horarios[idx,4] = "0:00"        
                 msg = "Horários de IDA e VOLTA removidos."
 
-            update.message.reply_text(msg)
+            await update.message.reply_text(msg)
 
-    def avisa(self, update, context):
+    async def avisa(self, update, context):
         channel = update.message.chat.type
         if channel == 'private':
             self.ouvir = True
-            update.message.reply_text("Aviso LIGADO")
+            await update.message.reply_text("Aviso LIGADO")
 
-    def silencia(self, update, context):
+    async def silencia(self, update, context):
         channel = update.message.chat.type
         if channel == 'private':
             self.ouvir = False
-            update.message.reply_text("Aviso DESLIGADO.")
+            await update.message.reply_text("Aviso DESLIGADO.")
 
 
-    
 if __name__ == '__main__':
     print("press CTRL + C to cancel.")
     # Create the Updater and pass it your bot's token.
@@ -214,47 +210,39 @@ if __name__ == '__main__':
     caroneiro = Caroneiro()
 
     # initiliaze class that contains the callback functions for caronas
-    updater = Updater(token=token, use_context=True)
-
-    # Get the dispatcher to register handlers
-    dispatcher = updater.dispatcher
+    application = Application.builder().token(token).build()
 
     # on different commands - answer in Telegram
-    dispatcher.add_handler(
+    application.add_handler(
             CommandHandler('help', caroneiro.ajuda)
         )
 
-    dispatcher.add_handler(
-            MessageHandler(Filters.regex(r'/ida'), caroneiro.add_carona)
+    application.add_handler(
+            MessageHandler(filters.Regex(r'/ida'), caroneiro.add_carona)
         )
     
-    dispatcher.add_handler(
-            MessageHandler(Filters.regex(r'/volta'), caroneiro.add_carona)
+    application.add_handler(
+            MessageHandler(filters.Regex(r'/volta'), caroneiro.add_carona)
         )
     
-    dispatcher.add_handler(
+    application.add_handler(
             CommandHandler('hora', caroneiro.get_set_horario)
         )
 
-    dispatcher.add_handler(
+    application.add_handler(
             CommandHandler('remover', caroneiro.remove_horario)
         )
     
-    dispatcher.add_handler(
+    application.add_handler(
             CommandHandler('avisa', caroneiro.avisa)
         )
 
-    dispatcher.add_handler(
+    application.add_handler(
             CommandHandler('silencia', caroneiro.silencia)
         )
 
     # Start the Bot
-    updater.start_polling()
-
-    # Block until the user presses Ctrl-C or the process receives SIGINT,
-    # SIGTERM or SIGABRT. This should be used most of the time, since
-    # start_polling() is non-blocking and will stop the bot gracefully.
-    updater.idle()
+    application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
 
